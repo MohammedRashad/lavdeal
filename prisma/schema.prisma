@@ -7,18 +7,29 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:../link_aggregator.db"
 }
 
 model User {
-  id       Int      @id @default(autoincrement())
-  username String   @unique
-  password String
-  isAdmin  Boolean  @default(false)
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  isAdmin   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Store {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  links       Link[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id          String   @id @default(cuid())
   name        String   @unique
   description String?
   links       Link[]
@@ -27,14 +38,18 @@ model Store {
 }
 
 model Link {
-  id          Int      @id @default(autoincrement())
+  id          String    @id @default(cuid())
   title       String
   url         String
   description String?
-  price       Float
-  store       Store    @relation(fields: [storeId], references: [id])
-  storeId     Int
-  category    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  price       Float?
+  weight      Float?
+  shipping    Float?
+  imageUrl    String?
+  store       Store     @relation(fields: [storeId], references: [id])
+  storeId     String
+  category    Category? @relation(fields: [categoryId], references: [id])
+  categoryId  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 } 

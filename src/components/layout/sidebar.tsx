@@ -24,10 +24,10 @@ export function Sidebar() {
   }
 
   return (
-    <div className="flex h-full w-64 flex-col bg-white border-r">
+    <div className="flex h-full w-64 flex-col border-r bg-card">
       <div className="flex flex-1 flex-col">
         <div className="flex h-16 shrink-0 items-center px-6">
-          <h1 className="text-2xl font-bold">Lav Deal</h1>
+          <h1 className="text-2xl font-bold text-card-foreground">Lav Deal</h1>
         </div>
         <nav className="flex flex-1 flex-col">
           <ul role="list" className="flex flex-1 flex-col gap-y-7">
@@ -41,12 +41,12 @@ export function Sidebar() {
                         href={item.href}
                         className={cn(
                           pathname === item.href
-                            ? 'bg-gray-100 text-primary'
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-primary',
+                            ? 'bg-accent text-accent-foreground'
+                            : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground',
                           'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 mx-2'
                         )}
                       >
-                        <Icon className="h-6 w-6 shrink-0" />
+                        <Icon className="h-5 w-5 shrink-0" />
                         {item.name}
                       </Link>
                     </li>
