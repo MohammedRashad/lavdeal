@@ -47,8 +47,9 @@ interface Link {
   url: string;
   weight?: number;
   shipping?: number;
-  category?: string;
+  category?: Category;
   store: Store;
+  price?: number;
 }
 
 interface TabPanelProps {
@@ -85,15 +86,15 @@ export default function AdminDashboard() {
     totalStores: 0,
     totalCategories: 0
   });
-  const [newLink, setNewLink] = useState({
+  const [newLink, setNewLink] = useState<Omit<Link, 'id' | 'store' | 'category'> & { store: string; category?: string }>({
     title: '',
     url: '',
     description: '',
-    price: '',
-    weight: '',
-    shipping: '',
-    storeId: '',
-    categoryId: ''
+    price: 0,
+    weight: 0,
+    shipping: 0,
+    store: '',
+    category: ''
   });
   const [editingLink, setEditingLink] = useState<Link | null>(null);
 
@@ -148,10 +149,16 @@ export default function AdminDashboard() {
   const handleAddLink = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const linkData = {
+        ...newLink,
+        store: { id: newLink.store },
+        category: newLink.category ? { id: newLink.category } : undefined
+      };
+      
       const response = await fetch('/api/links', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newLink)
+        body: JSON.stringify(linkData)
       });
       
       if (!response.ok) throw new Error('Failed to add link');
@@ -161,11 +168,11 @@ export default function AdminDashboard() {
         title: '',
         url: '',
         description: '',
-        price: '',
-        weight: '',
-        shipping: '',
-        storeId: '',
-        categoryId: ''
+        price: 0,
+        weight: 0,
+        shipping: 0,
+        store: '',
+        category: ''
       });
     } catch (error) {
       console.error('Failed to add link:', error);
@@ -316,8 +323,8 @@ export default function AdminDashboard() {
                   fullWidth
                   value={editingLink ? editingLink.price : newLink.price}
                   onChange={(e) => editingLink
-                    ? setEditingLink({...editingLink, price: e.target.value})
-                    : setNewLink({...newLink, price: e.target.value})
+                    ? setEditingLink({...editingLink, price: Number(e.target.value)})
+                    : setNewLink({...newLink, price: Number(e.target.value)})
                   }
                 />
               </Grid>
@@ -330,8 +337,8 @@ export default function AdminDashboard() {
                   fullWidth
                   value={editingLink ? editingLink.weight : newLink.weight}
                   onChange={(e) => editingLink
-                    ? setEditingLink({...editingLink, weight: e.target.value})
-                    : setNewLink({...newLink, weight: e.target.value})
+                    ? setEditingLink({...editingLink, weight: Number(e.target.value)})
+                    : setNewLink({...newLink, weight: Number(e.target.value)})
                   }
                 />
               </Grid>
@@ -344,8 +351,8 @@ export default function AdminDashboard() {
                   fullWidth
                   value={editingLink ? editingLink.shipping : newLink.shipping}
                   onChange={(e) => editingLink
-                    ? setEditingLink({...editingLink, shipping: e.target.value})
-                    : setNewLink({...newLink, shipping: e.target.value})
+                    ? setEditingLink({...editingLink, shipping: Number(e.target.value)})
+                    : setNewLink({...newLink, shipping: Number(e.target.value)})
                   }
                 />
               </Grid>
@@ -353,10 +360,10 @@ export default function AdminDashboard() {
                 <FormControl fullWidth size="small">
                   <InputLabel>Store</InputLabel>
                   <Select
-                    value={editingLink ? editingLink.store?.id : newLink.storeId}
+                    value={editingLink ? editingLink.store?.id : newLink.store}
                     onChange={(e) => editingLink
                       ? setEditingLink({...editingLink, store: { ...editingLink.store, id: e.target.value as string }})
-                      : setNewLink({...newLink, storeId: e.target.value as string})
+                      : setNewLink({...newLink, store: e.target.value as string})
                     }
                     label="Store"
                     required
@@ -373,11 +380,22 @@ export default function AdminDashboard() {
                 <FormControl fullWidth size="small">
                   <InputLabel>Category</InputLabel>
                   <Select
-                    value={editingLink ? editingLink.categoryId : newLink.categoryId}
-                    onChange={(e) => editingLink
-                      ? setEditingLink({...editingLink, categoryId: e.target.value as string})
-                      : setNewLink({...newLink, categoryId: e.target.value as string})
-                    }
+                    value={editingLink ? editingLink.category?.id : newLink.category}
+                    onChange={(e) => {
+                      const categoryId = e.target.value as string;
+                      if (editingLink) {
+                        const category = categories.find(c => c.id === categoryId);
+                        setEditingLink({
+                          ...editingLink,
+                          category: category || undefined
+                        });
+                      } else {
+                        setNewLink({
+                          ...newLink,
+                          category: categoryId
+                        });
+                      }
+                    }}
                     label="Category"
                   >
                     <MenuItem value="">

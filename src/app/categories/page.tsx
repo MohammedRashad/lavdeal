@@ -5,15 +5,17 @@ export default async function CategoriesPage() {
   const links = await prisma.link.findMany({
     include: {
       store: true,
+      category: true,
     },
   })
 
   // Group links by category
   const categories = links.reduce((acc, link) => {
-    if (!acc[link.category]) {
-      acc[link.category] = []
+    const categoryName = link.category?.name || 'Uncategorized'
+    if (!acc[categoryName]) {
+      acc[categoryName] = []
     }
-    acc[link.category].push(link)
+    acc[categoryName].push(link)
     return acc
   }, {} as Record<string, typeof links>)
 
